@@ -1,0 +1,13 @@
+# Smithery configuration for Email Verify MCP Server
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+    description: "Email Verify MCP server - no additional configuration required"
+  commandFunction:
+    type: text
+    body: |
+      #!/bin/bash
+      # Run the email verification MCP server
+      python /app/server.py
