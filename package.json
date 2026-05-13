@@ -1,0 +1,22 @@
+{
+  "name": "agentpay-email-verify-mcp",
+  "version": "1.1.0",
+  "description": "MCP server: Email verification with format checks, MX records, disposable detection, typo correction, and rate limiting + Pro tier",
+  "main": "server.py",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "ai-agent",
+    "email",
+    "email-verification",
+    "email-validation",
+    "agentpay"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rumblingb/email-verify-mcp.git"
+  },
+  "homepage": "https://rumblingb.github.io/email-verify-mcp/",
+  "author": "AgentPay Labs",
+  "license": "MIT"
+}

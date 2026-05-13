@@ -32,9 +32,16 @@ Zero external API dependencies. Everything runs locally using:
 }
 ```
 
+## Pricing & Rate Limits
+
+| Plan | Price | Limit |
+|------|-------|-------|
+| **Free** | $0 | 50 verifications per server instance |
+| **Pro** | **$19/month** | Unlimited verifications |
+
 ## Usage
 
-### With Claude Desktop
+### With Claude Desktop (Free Tier)
 
 Add to your `claude_desktop_config.json`:
 
@@ -49,26 +56,42 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+### With Claude Desktop (Pro Tier)
+
+```json
+{
+  "mcpServers": {
+    "email-verify": {
+      "command": "python",
+      "args": ["path/to/email-verify-mcp/server.py", "--pro-key", "PROL_AGENTPAY_DEMO"]
+    }
+  }
+}
+```
+
 ### With Smithery
 
 [![Smithery](https://smithery.ai/badge/email-verify-mcp)](https://smithery.ai/server/email-verify-mcp)
+
+On Smithery, configure the `proKey` environment variable to use Pro mode.
 
 ### From Command Line
 
 ```bash
 pip install -r requirements.txt
+
+# Free tier (50 calls)
 python server.py
+
+# Pro tier (unlimited)
+python server.py --pro-key PROL_AGENTPAY_DEMO
 ```
 
-## Pricing
+## Get a Pro Key
 
-| Plan | Price | Includes |
-|------|-------|----------|
-| **Starter** | **$19/month** | 5,000 verifications/month, email support |
-| Professional | $49/month | 25,000 verifications/month, priority support |
-| Enterprise | Custom | Unlimited verifications, SLA, dedicated support |
+[Subscribe Now — $19/month](https://buy.stripe.com/5kQ3cxflRabW9PW1AD1oI0r)
 
-[Subscribe Now — $19/month](https://buy.stripe.com/dRm6oJ4Hd2Jugek0wz1oI0m)
+After purchase, you'll receive a Pro key (PROL_XXX) to unlock unlimited email verifications.
 
 ## Why Email Verification?
 
@@ -77,13 +100,11 @@ python server.py
 - **Improve deliverability** — ISPs reward clean lists with better inbox placement
 - **Protect domain reputation** — High bounce rates can get you blacklisted
 
-This is a proven business model generating **$400+/month** (see: IPWhois.io, VAT-Sense, TinyScreenshot).
-
 ## Requirements
 
 - Python 3.8+
 - `mcp>=1.0.0`
-- No external APIs, no API keys, no subscriptions
+- No external APIs, no API keys, no subscriptions needed for free tier
 
 ## License
 

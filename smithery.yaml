@@ -1,13 +1,14 @@
-# Smithery configuration for Email Verify MCP Server
 startCommand:
   type: stdio
   configSchema:
     type: object
-    properties: {}
-    description: "Email Verify MCP server - no additional configuration required"
-  commandFunction:
-    type: text
-    body: |
-      #!/bin/bash
-      # Run the email verification MCP server
-      python /app/server.py
+    properties:
+      proKey:
+        type: string
+        description: "Pro key (PROL_XXX) for unlimited email verifications. Buy at https://buy.stripe.com/5kQ3cxflRabW9PW1AD1oI0r"
+  commandFunction: |
+    (config) => {
+      const args = ['server.py'];
+      if (config.proKey) { args.push('--pro-key', config.proKey); }
+      return {command: 'python3', args: args};
+    }
