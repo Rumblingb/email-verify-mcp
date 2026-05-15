@@ -1,6 +1,6 @@
 {
   "name": "agentpay-email-verify-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MCP server: Email verification with format checks, MX records, disposable detection, typo correction, and rate limiting + Pro tier",
   "main": "server.py",
   "keywords": [
