@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 
 # Import MCP SDK
-from mcp.server import Server, NotificationOptions
+from mcp.server.lowlevel import Server, NotificationOptions
 from mcp.server.stdio import stdio_server
 from mcp.server.models import InitializationOptions
 from mcp.types import Tool, TextContent, ErrorData
