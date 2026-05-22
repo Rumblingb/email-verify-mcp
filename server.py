@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 
 """
 Email Verification MCP Server
@@ -25,7 +25,7 @@ from mcp.server.models import InitializationOptions
 from mcp.types import Tool, TextContent, ErrorData
 import mcp.types as types
 
-# ─── Rate Limiting & Pro Key ───────────────────────────────────────────
+# â”€â”€â”€ Rate Limiting & Pro Key â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 FREE_LIMIT = 50
 PRO_KEYS = {"PROL_AGENTPAY_DEMO": "demo"}  # Demo key for testing
 STRIPE_LINK = "https://buy.stripe.com/5kQ3cxflRabW9PW1AD1oI0r"  # $19/mo
@@ -507,7 +507,7 @@ DISPOSABLE_DOMAINS = frozenset({
 })
 
 # ---------------------------------------------------------------------------
-# Common email service typos → correct domains
+# Common email service typos â†’ correct domains
 # ---------------------------------------------------------------------------
 TYPO_MAP = {
     # Gmail typos
@@ -828,6 +828,44 @@ def verify_email_batch(emails: List[str]) -> List[dict]:
 # MCP Server Implementation
 # ============================================================================
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EMAIL FINDER (merged from email-finder-mcp)
+# ─────────────────────────────────────────────────────────────────────────────
+_PATTERNS = ["{first}.{last}", "{first}{last}", "{f}{last}", "{first}_{last}",
+             "{first}", "{last}.{first}", "{f}.{last}", "{last}"]
+
+def _gen_candidates(first: str, last: str, domain: str) -> list:
+    first, last = first.lower().strip(), last.lower().strip()
+    f = first[0] if first else ""; l = last[0] if last else ""
+    out = []
+    for p in _PATTERNS:
+        try:
+            out.append(p.format(first=first, last=last, f=f, l=l) + "@" + domain)
+        except KeyError:
+            pass
+    return out
+
+def _find_best_email(first: str, last: str, domain: str) -> dict:
+    if not check_mx_record(domain):
+        return {"found": False, "error": f"{domain} has no MX record"}
+    for email in _gen_candidates(first, last, domain):
+        if check_email_format(email):
+            r = verify_single_email(email)
+            if r.get("score", 0) >= 0.6:
+                return {"found": True, "email": email, "score": r["score"], "confidence": "high"}
+    best = _gen_candidates(first, last, domain)
+    return {"found": bool(best), "email": best[0] if best else None, "confidence": "low",
+            "note": "Unverified guess — most common pattern for this domain"}
+
+def _company_patterns(domain: str) -> dict:
+    if not check_mx_record(domain):
+        return {"error": f"No MX record for {domain}", "patterns": []}
+    patterns = []
+    for pat, sample in [("{first}.{last}","john.doe"),("{first}{last}","johndoe"),("{f}{last}","jdoe"),("{first}","john")]:
+        patterns.append({"pattern": pat, "example": f"{sample}@{domain}"})
+    return {"domain": domain, "mx_valid": True, "formats": patterns,
+            "note": "Most common patterns — use find_email to verify for a specific person"}
 async def main():
     server = Server("email-verify-mcp")
 
@@ -880,7 +918,16 @@ async def main():
                     "required": ["domain"],
                 },
             ),
-        ]
+            Tool(
+                name="find_email",
+                description="Find the most likely email address for a person at a company domain. Uses pattern matching and MX verification. Free tier included.",
+                inputSchema={"type":"object","properties":{"first_name":{"type":"string"},"last_name":{"type":"string"},"domain":{"type":"string"}},"required":["first_name","last_name","domain"]},
+            ),
+            Tool(
+                name="find_company_emails",
+                description="Discover the email format (first.last, firstlast, etc.) used at a company domain.",
+                inputSchema={"type":"object","properties":{"domain":{"type":"string"}},"required":["domain"]},
+            ),        ]
 
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
         try:
@@ -923,6 +970,12 @@ async def main():
                 }
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
+            elif name == "find_email":
+                r = _find_best_email(arguments.get("first_name",""), arguments.get("last_name",""), arguments.get("domain",""))
+                return [TextContent(type="text", text=json.dumps(r, indent=2))]
+            elif name == "find_company_emails":
+                r = _company_patterns(arguments.get("domain",""))
+                return [TextContent(type="text", text=json.dumps(r, indent=2))]
             else:
                 return [TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}, indent=2))]
 
